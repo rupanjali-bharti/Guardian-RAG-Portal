@@ -6,6 +6,6 @@ chromadb
 langchain
 langchain-community
 sentence-transformers
-pydantic<2
+pydantic>=2
 pypdf
 python-docx
