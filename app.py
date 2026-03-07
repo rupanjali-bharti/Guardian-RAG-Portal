@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 from streamlit_firebase_auth import FirebaseAuth
-import PyPDF2
+import pypdf
 from docx import Document
 
 # Modularized Imports
