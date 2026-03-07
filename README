@@ -7,7 +7,7 @@
 ## 📊 Project Output
 Below is the Executive Audit Dashboard showing the real-time compliance score and identified information gaps.
 
-![Executive Dashboard](./assets/output1.png)
+![Executive Dashboard]("https://github.com/user-attachments/assets/097ceec7-59aa-4bd9-ad3d-8f0eaa40d3cd")
 
 ### 🔍 Detailed Gap Analysis
 The system identifies specific gaps in policy documentation by calculating a Grounding Score based on citations and answer depth.
