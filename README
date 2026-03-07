@@ -1,79 +1,393 @@
-Here is a comprehensive `README.md` tailored specifically for your **Almabase GTM Engineer Intern** assignment. You can copy and paste this directly into the root folder of your repository.
-
----
-
 # 🛡️ Guardian RAG Portal | EduConnect AI
 
-### 🌐 [Live Application Link](https://www.google.com/search?q=YOUR_DEPLOYED_URL_HERE) | 📂 [GitHub Repository](https://github.com/rupanjali-bharti/Guardian-RAG-Portal.git)
+### 🌐 Live Demo: https://rupanjali-bharti-guardian-rag-portal-app-ijg6m1.streamlit.app/ 
+### 📂 Repository: https://github.com/rupanjali-bharti/Guardian-RAG-Portal
 
 ---
 
-## 🏢 Fictional Company Profile
+# 📌 Project Overview
 
-* **Company Name**: **EduConnect AI**
-* **Industry**: Education Technology (SaaS)
-* **Description**: EduConnect AI is a specialized platform designed to automate administrative, security, and compliance workflows for higher-education institutions and universities. We help institutions manage student data safely while complying with global privacy standards.
+**Guardian RAG Portal** is an AI-powered system designed to automate structured security and compliance questionnaires using **Retrieval-Augmented Generation (RAG)**.
 
----
+The platform allows organizations to upload **policy documents and reference materials**, then automatically generate **grounded answers** to security, compliance, or vendor questionnaires.
 
-## ❓ The Problem
+Instead of generic AI responses, the system ensures that:
 
-University compliance teams and EdTech vendors are frequently overwhelmed by **structured questionnaires** (Security Reviews, GDPR assessments, and Vendor Audits).
+✔ Answers come **only from verified internal documents**  
+✔ Each response includes **source references**  
+✔ Missing information is automatically **flagged as documentation gaps**
 
-* **Manual Effort**: Teams spend hours searching through internal PDFs and policy docs to answer the same questions repeatedly.
-* **Inconsistency**: Human error often leads to inconsistent or unverified answers across different audits.
-* **Lack of Evidence**: Standard AI bots often provide answers without proving *where* the information came from, making them unreliable for formal audits.
+This makes the tool especially useful for **security audits, vendor reviews, and compliance assessments**.
 
 ---
 
-## ✅ The Solution: Guardian RAG Portal
+# 🏢 Fictional Company Profile
 
-The **Guardian RAG Portal** is an automated tool that uses **Retrieval-Augmented Generation (RAG)** to bridge the gap between static policy documents and complex questionnaires.
+### Company: EduConnect AI
 
-### **Key Features**
+**Industry:** Education Technology (SaaS)
 
-* **Secure Authentication**: Role-based access via **Firebase** ensures that only authorized personnel can access sensitive internal policies.
-* **Grounded AI Answering**: The system uses a RAG pipeline to ensure every answer is derived strictly from uploaded "Sources of Truth".
-* **Automated Citations**: Each generated response is mapped to its specific source file (e.g., `security_policy.txt`), providing a clear audit trail.
-* **Executive Dashboard**: A visual interface providing a "Compliance Score" and immediate identification of "Documentation Gaps".
-* **Export Ready**: Review, edit, and export the finalized questionnaire as a structured CSV for immediate submission.
+EduConnect AI provides automation tools that help universities manage **security compliance, administrative workflows, and student data governance**.
 
----
+The platform helps institutions comply with global privacy and security standards such as:
 
-## 🏗️ Technical Architecture
+- GDPR
+- SOC2
+- ISO security frameworks
 
-The system is built using a modular Python-based stack designed for scalability and transparency.
-
-1. **Ingestion Layer**: User uploads raw policy documents (.txt). These are chunked into meaningful segments and stored as embeddings in a **ChromaDB** vector store.
-2. **Retrieval Layer**: When a questionnaire (CSV) is uploaded, the system performs a semantic search to find the most relevant policy chunks for each question.
-3. **Generation Layer**: An LLM (Large Language Model) synthesizes the answer using *only* the retrieved context. If no information is found, it flags a "Gap".
-4. **UI/UX Layer**: A **Streamlit** frontend renders the Executive Dashboard and interactive Audit Cards for human review.
+EduConnect AI enables institutions to safely manage **sensitive student and operational data** while maintaining regulatory compliance.
 
 ---
 
-## 🛠️ Assumptions & Trade-offs
+# ❗ Problem Statement
 
-* **Data Format**: I assumed reference documents would be provided in `.txt` format to prioritize retrieval accuracy over complex PDF parsing.
-* **Framework Selection**: I chose **Streamlit** for the frontend to deliver a functional end-to-end tool quickly, focusing on the RAG logic rather than custom CSS.
-* **Confidence Logic**: I implemented a strict "Confidence" check where an answer is flagged as a "Gap" if it lacks a direct citation or contains specific uncertainty keywords.
+Compliance and security teams frequently receive **structured questionnaires** during:
+
+- Vendor security reviews
+- GDPR assessments
+- Procurement evaluations
+- Third-party audits
+
+These questionnaires often contain **50–200 repetitive questions** like:
+
+- Where is customer data stored?
+- What encryption methods are used?
+- How frequently are security audits conducted?
+
+### Current Challenges
+
+### 1. Manual Effort
+
+Teams must manually search through internal documents such as:
+
+- Security policies  
+- Data governance guidelines  
+- Compliance documentation  
+
+This process is **slow and repetitive**.
 
 ---
 
-## 📈 Future Improvements
+### 2. Inconsistent Responses
 
-* **Partial Regeneration**: Allow users to re-run specific "Low Confidence" questions after uploading new documents.
-* **Evidence Snippets**: Add a "View Source" button to show the exact paragraph used for the answer.
-* **Multi-Format Support**: Expand ingestion to support PDF, Docx, and Knowledge Graph (Neo4j) integrations.
+Different employees may answer the same question differently, leading to **inconsistent audit responses**.
 
 ---
 
-## 🚀 How to Run Locally
+### 3. Lack of Evidence
 
-1. Clone the repo: `git clone https://github.com/rupanjali-bharti/Guardian-RAG-Portal.git`
-2. Install dependencies: `pip install -r requirements.txt`
-3. Set up `.env`: Add your Firebase and LLM API keys.
-4. Run the app: `streamlit run app.py`
+Typical AI assistants provide answers but **cannot verify their sources**, which makes them unreliable for formal compliance submissions.
 
 ---
 
-**Would you like me to help you format a professional LinkedIn post to share this completed project?**
+# ✅ Solution: Guardian RAG Portal
+
+Guardian RAG Portal solves this problem using a **RAG-based AI pipeline**.
+
+The system automatically:
+
+1. Reads internal documentation  
+2. Understands questionnaire questions  
+3. Retrieves relevant policy sections  
+4. Generates **verified answers with citations**
+
+If no relevant information exists, the system flags a **documentation gap**, helping teams identify missing policies.
+
+---
+
+# ⭐ Key Features
+
+### 🔐 Secure Access
+
+Role-based authentication using **Firebase** ensures that only authorized users can access internal policy documents.
+
+---
+
+### 🧠 Retrieval-Augmented Generation (RAG)
+
+Instead of relying purely on an LLM, the system retrieves **relevant document chunks** before generating an answer.
+
+This ensures responses are:
+
+- factual  
+- grounded  
+- traceable  
+
+---
+
+### 📚 Source Attribution
+
+Each generated answer is mapped to its **original document source**.
+
+Example:
+
+Answer: Data is encrypted using AES-256  
+Source: security_policy.txt
+
+This provides **audit-friendly traceability**.
+
+---
+
+### 📊 Executive Compliance Dashboard
+
+The system provides a visual dashboard showing:
+
+- Overall **Compliance Score**
+- Questions with **Low Confidence**
+- **Documentation Gaps**
+
+This helps leadership quickly understand readiness for an audit.
+
+---
+
+### 📤 Export Ready Output
+
+Final answers can be exported as a **CSV file** for immediate submission to:
+
+- Security reviewers  
+- Procurement teams  
+- Compliance auditors  
+
+---
+
+# 🏗️ System Architecture
+
+```
+                ┌─────────────────────────┐
+                │     User Interface      │
+                │       (Streamlit)       │
+                └────────────┬────────────┘
+                             │
+                             ▼
+                ┌─────────────────────────┐
+                │   Authentication Layer  │
+                │       (Firebase)        │
+                └────────────┬────────────┘
+                             │
+                             ▼
+                ┌─────────────────────────┐
+                │   Document Ingestion    │
+                │  (Chunking & Embedding) │
+                └────────────┬────────────┘
+                             │
+                             ▼
+                ┌─────────────────────────┐
+                │     Vector Database     │
+                │        ChromaDB         │
+                └────────────┬────────────┘
+                             │
+                             ▼
+                ┌─────────────────────────┐
+                │    Retrieval Engine     │
+                │   (Semantic Search)     │
+                └────────────┬────────────┘
+                             │
+                             ▼
+                ┌─────────────────────────┐
+                │      LLM Generator      │
+                │ (Answer Synthesis + QA) │
+                └────────────┬────────────┘
+                             │
+                             ▼
+                ┌─────────────────────────┐
+                │   Response + Citation   │
+                │   Confidence Scoring    │
+                └────────────┬────────────┘
+                             │
+                             ▼
+                ┌─────────────────────────┐
+                │    Export (CSV Output)  │
+                └─────────────────────────┘
+```
+
+---
+
+# 🔄 System Workflow
+
+### Step 1 — Upload Reference Documents
+
+Users upload internal documents such as:
+
+- security policies  
+- compliance documents  
+- governance guidelines  
+
+---
+
+### Step 2 — Document Processing
+
+The system:
+
+- splits documents into smaller chunks  
+- converts text into vector embeddings  
+- stores them in **ChromaDB**
+
+---
+
+### Step 3 — Upload Questionnaire
+
+Users upload a structured questionnaire (CSV) containing multiple questions.
+
+Example:
+
+| Question |
+|--------|
+| What encryption is used? |
+| Where is data stored? |
+
+---
+
+### Step 4 — Semantic Retrieval
+
+For each question:
+
+1. The system performs a **semantic similarity search**  
+2. Retrieves the most relevant document chunks  
+
+---
+
+### Step 5 — AI Answer Generation
+
+The LLM generates answers using **only retrieved document context**.
+
+This prevents hallucinations and ensures **grounded answers**.
+
+---
+
+### Step 6 — Confidence Evaluation
+
+The system checks:
+
+- whether a citation exists  
+- whether the answer contains uncertainty indicators  
+
+If confidence is low, the system marks the question as:
+
+⚠ **Documentation Gap**
+
+---
+
+### Step 7 — Review & Export
+
+Users can:
+
+- review generated answers  
+- edit responses if needed  
+- export the final questionnaire as **CSV**
+
+---
+
+# 🛠️ Technology Stack
+
+| Component | Technology |
+|--------|--------|
+| Frontend | Streamlit |
+| Backend | Python |
+| Vector Database | ChromaDB |
+| LLM Integration | OpenAI / LLM API |
+| Embeddings | Sentence Transformers |
+| Authentication | Firebase |
+| Data Processing | LangChain |
+
+---
+
+# ⚖️ Assumptions & Trade-offs
+
+### Document Format
+
+Reference documents are assumed to be **.txt format** for reliable parsing.
+
+Future versions can support:
+
+- PDF  
+- DOCX  
+- HTML  
+
+---
+
+### Framework Choice
+
+**Streamlit** was selected to rapidly build a functional end-to-end application without focusing on frontend complexity.
+
+---
+
+### Confidence Detection
+
+Answers are marked as low confidence when:
+
+- No supporting document is retrieved  
+- The response includes uncertainty terms  
+
+---
+
+# 📈 Future Improvements
+
+### Evidence Viewer
+
+Add a **View Source button** to show the exact paragraph used for answer generation.
+
+---
+
+### Multi-format Document Support
+
+Support ingestion for:
+
+- PDF  
+- DOCX  
+- Knowledge bases  
+
+---
+
+### Partial Question Regeneration
+
+Allow users to regenerate answers **only for selected questions** after uploading additional documents.
+
+---
+
+### Advanced Analytics
+
+Provide deeper insights such as:
+
+- document coverage analysis  
+- frequently asked questions  
+- compliance readiness trends  
+
+---
+
+# 🚀 Local Setup Instructions
+
+### 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/rupanjali-bharti/Guardian-RAG-Portal.git
+cd Guardian-RAG-Portal
+```
+
+### 2️⃣ Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3️⃣ Configure Environment Variables
+
+Create a `.env` file and add:
+
+```
+OPENAI_API_KEY=your_api_key
+FIREBASE_API_KEY=your_firebase_key
+```
+
+### 4️⃣ Run Application
+
+```bash
+streamlit run app.py
+```
+
+---
+
+# 📌 Assignment Context
+
+This project was built as part of the **GTM Engineering Internship assignment** for Almabase, focusing on solving real-world **security questionnaire automation problems** using modern AI techniques.
+
+---

@@ -3,14 +3,11 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 from streamlit_firebase_auth import FirebaseAuth
-
-# Modularized Imports - Ensure these files are in your GitHub root
 from login_page import show_login
 from main_rag import run_rag_single
 from vector_store import add_documents
 from dashboard import show_dashboard
 
-# Load environment variables for local testing
 load_dotenv()
 
 # --- 1. INITIALIZATION & STYLING ---
@@ -27,7 +24,7 @@ def apply_adaptive_styling():
     """, unsafe_allow_html=True)
 
 # --- 2. CONFIGURATION ---
-# (Keeping Auth object for variable stability, but skipping the login gate)
+
 auth = FirebaseAuth({
     "apiKey": os.getenv("FIREBASE_API_KEY"),
     "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
@@ -37,7 +34,6 @@ auth = FirebaseAuth({
     "appId": os.getenv("FIREBASE_APP_ID")
 })
 
-# Mock user for the UI since login is currently disabled for reviewer ease
 user_name = "Guest Reviewer" 
 
 # --- 3. SIDEBAR (KNOWLEDGE BASE MANAGEMENT) ---
@@ -109,7 +105,6 @@ if q_file:
 # --- 5. RENDER FINDINGS & DASHBOARD ---
 if st.session_state.rag_results:
     st.divider()
-    # Call to your modular dashboard
     show_dashboard(st.session_state.rag_results) 
 
     st.write("")
@@ -121,7 +116,6 @@ if st.session_state.rag_results:
             h_col, c_col = st.columns([5, 1])
             h_col.markdown(f"**Item {i+1}:** {res['Question']}")
             
-            # Dynamic Badge UI
             if res.get('Confidence') == "High":
                 c_col.success("VERIFIED")
             else:
