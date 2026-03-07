@@ -1,0 +1,19 @@
+# Environments
+.env
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Streamlit
+.streamlit/config.toml
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Data/Database (Optional, if you want to keep data local)
+*.db
+*.csv
+!questionnaire_template.csv
+chroma_db/

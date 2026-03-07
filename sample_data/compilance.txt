@@ -1,0 +1,3 @@
+CloudDesk complies with GDPR and SOC2 standards.
+Role-based access control is implemented.
+Daily automated backups are performed.
