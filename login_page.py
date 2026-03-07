@@ -9,8 +9,14 @@ def show_login(auth):
         st.subheader("Compliance & Security Portal")
         st.markdown("Sign in or create a new account to access the portal.")
         st.divider()
-        
-        # Changing this to ["password"] forces the email/password UI to appear
-        auth.login_form(providers=["password"]) 
-        
+
+        # Login and Signup buttons for Firebase email/password authentication
+        login_tab, signup_tab = st.tabs(["Login", "Sign Up"])
+        with login_tab:
+            st.write("Login with your email and password.")
+            auth.login_form(providers=["password"])
+        with signup_tab:
+            st.write("Create a new account.")
+            auth.signup_form(providers=["password"])
+
         st.caption("Authorized Access Only")
