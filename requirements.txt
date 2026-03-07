@@ -4,9 +4,8 @@ python-dotenv
 streamlit-firebase-auth
 chromadb
 langchain
+langchain-community
 sentence-transformers
-pydantic==1.10.12
-pydantic-settings
-openai
+pydantic<2
 pypdf
 python-docx
