@@ -37,7 +37,18 @@ auth = FirebaseAuth({
     "appId": os.getenv("FIREBASE_APP_ID")
 })
 
-user_name = "Guest Reviewer" 
+# --- 2. AUTH SETUP ---
+# Re-enable the session check to protect your RAG engine
+user = auth.check_session()
+if not user:
+    apply_adaptive_styling()
+    show_login(auth)
+    st.stop()
+
+# Get the actual email of the person who just signed up
+user_email = user.get('email', 'New User')
+user_name = user_email.split('@')[0].capitalize()
+
 
 # --- 3. SIDEBAR (KNOWLEDGE BASE MANAGEMENT) ---
 with st.sidebar:
