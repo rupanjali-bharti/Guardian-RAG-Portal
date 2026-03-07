@@ -1,0 +1,9 @@
+EduConnect AI: Corporate Governance and Contact Directory
+
+1. Security Leadership: The oversight of our security program is managed by our Chief Information Security Officer (CISO), Rupanjali Singh. She is responsible for the strategic direction of our SOC2 and ISO initiatives.
+
+2. Privacy Leadership: Legal and privacy matters are directed by our Data Protection Officer (DPO), Michael Chen, who oversees our GDPR and CCPA compliance roadmaps.
+
+3. Incident Response: In the event of a suspected data breach or security anomaly, stakeholders should immediately contact our 24/7 Response Team at emergency-response@educonnect.ai.
+
+4. Global Presence: EduConnect AI is a global organization. Our Corporate Headquarters is located in Bengaluru, India, which houses our primary engineering and AI research teams. We also maintain a satellite business office in New York, USA

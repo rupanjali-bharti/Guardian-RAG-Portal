@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import re
 from dotenv import load_dotenv
 from streamlit_firebase_auth import FirebaseAuth
 import pypdf
@@ -17,6 +18,12 @@ load_dotenv()
 # --- 1. INITIALIZATION & STYLING ---
 st.set_page_config(page_title="EduConnect AI | Compliance Portal", layout="wide")
 
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SAVE_DIR = os.path.join(CURRENT_DIR, "sample_data")
+
+if not os.path.exists(SAVE_DIR):
+    os.makedirs(SAVE_DIR)
+
 def apply_adaptive_styling():
     st.markdown("""
     <style>
@@ -24,6 +31,8 @@ def apply_adaptive_styling():
     [data-testid="metric-container"] { border: 1px solid rgba(128, 128, 128, 0.2); border-radius: 12px; padding: 15px; }
     .small-font { font-size: 14px; opacity: 0.8; }
     .stButton>button { border-radius: 8px; }
+    .gap-bar { height: 12px; border-radius: 6px; background: #333; margin-top: 5px; }
+    .gap-fill { height: 12px; border-radius: 6px; transition: width 0.8s ease-in-out; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -37,36 +46,34 @@ auth = FirebaseAuth({
     "appId": os.getenv("FIREBASE_APP_ID")
 })
 
-user_name = "Guest Reviewer" 
+user_name = "Rupanjali"
 
 # --- 3. SIDEBAR (KNOWLEDGE BASE MANAGEMENT) ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2942/2942789.png", width=60)
     st.title("EduConnect AI")
-    with st.container(border=True):
-        st.write(f"User: **{user_name}**")
-        st.caption("Direct Reviewer Access Enabled")
-
+    st.write(f"User: **{user_name}**")
+    
     st.divider()
     st.subheader("Knowledge Base")
-    st.markdown("<p class='small-font'>Upload university policies to ground the AI.</p>", unsafe_allow_html=True)
-    
     ref_files = st.file_uploader("Upload Policy Docs", accept_multiple_files=True, type=["txt", "pdf", "docx"], label_visibility="collapsed")
     
     if st.button("Index Documents", type="primary", use_container_width=True) and ref_files:
-        with st.spinner("Indexing to Vector Store..."):
+        with st.spinner("Indexing..."):
             for f in ref_files:
+                file_path = os.path.join(SAVE_DIR, f.name)
+                with open(file_path, "wb") as save_file:
+                    save_file.write(f.getbuffer())
+                
                 text_content = ""
-                # PDF Extraction Logic
                 if f.name.endswith(".pdf"):
                     pdf_reader = pypdf.PdfReader(f)
                     text_content = "\n".join([page.extract_text() for page in pdf_reader.pages])
-                # Word Extraction Logic
                 elif f.name.endswith(".docx"):
                     doc = Document(f)
                     text_content = "\n".join([para.text for para in doc.paragraphs])
-                # Text Extraction Logic
                 else:
+                    f.seek(0)
                     text_content = f.read().decode("utf-8")
                 
                 if text_content.strip():
@@ -77,76 +84,101 @@ with st.sidebar:
 # --- 4. MAIN AUDIT LOGIC (RAG PIPELINE) ---
 apply_adaptive_styling()
 st.title("Compliance Portal")
-st.markdown("<p class='small-font'>Automated Vendor Security Assessment and Gap Analysis</p>", unsafe_allow_html=True)
 
 if 'rag_results' not in st.session_state:
     st.session_state.rag_results = []
 
-st.write("Upload Questionnaire")
-q_file = st.file_uploader("Upload Questionnaire (CSV)", type=["csv"], label_visibility="collapsed")
+q_file = st.file_uploader("Upload Questionnaire (CSV)", type=["csv"])
 
 if q_file:
-    try:
-        df_q = pd.read_csv(q_file)
-        questions = df_q.iloc[:, 0].dropna().tolist()
-        
-        if st.button("Start Answering", type="primary"):
-            with st.status("Analyzing documentation via RAG...", expanded=True) as status:
-                temp_results = []
-                for i, q in enumerate(questions):
-                    res = run_rag_single(q)
-                    ans_text = res.get('Answer', '').lower()
-                    cit_text = str(res.get('Citation', '')).lower()
+    # Save CSV locally [cite: 26, 27, 28, 29, 30]
+    csv_path = os.path.join(SAVE_DIR, q_file.name)
+    with open(csv_path, "wb") as f_csv:
+        f_csv.write(q_file.getbuffer())
+    
+    q_file.seek(0)
+    df_q = pd.read_csv(q_file)
+    questions = df_q.iloc[:, 0].dropna().tolist()
+    
+    if st.button("Start Answering", type="primary"):
+        with st.status("Analyzing...", expanded=True) as status:
+            temp_results = []
+            for i, q in enumerate(questions):
+                res = run_rag_single(q)
+                ans_text = res.get('Answer', '').lower()
+                cit_text = str(res.get('Citation', '')).lower()
 
-                    # Robust Gap Detection Logic
-                    gap_keywords = ["not found", "not mentioned", "no information", "does not specify", "unavailable"]
-                    has_gap_phrase = any(phrase in ans_text for phrase in gap_keywords)
-                    is_missing_citation = cit_text in ["n/a", "none", "", "unknown", "nan"]
-                    
-                    if has_gap_phrase or is_missing_citation or len(ans_text) < 20:
-                        res['Confidence'] = "Low"
-                    else:
-                        res['Confidence'] = "High"
-                        
-                    temp_results.append(res)
+                # --- MULTI-METRIC GAP SCORING ---
+                grounding_score = 0
+                sources = re.findall(r'source:?\s*(\d+)', cit_text)
                 
-                st.session_state.rag_results = temp_results
-                status.update(label="Analysis Complete", state="complete")
+                if sources: grounding_score += 35 # Weighting source presence [cite: 26, 27]
+                if len(set(sources)) > 1: grounding_score += 15 # Multiple sources weight
+                
+                gap_words = ["not found", "not mentioned", "no information", "unavailable", "unable", "omits"]
+                if not any(w in ans_text for w in gap_words): grounding_score += 25 # Penalty check [cite: 1, 4, 14]
+                
+                if len(ans_text) > 80: grounding_score += 25 # Detail depth check
+                
+                gap_val = 100 - grounding_score
+                res['GapPercentage'] = gap_val
 
-    except Exception as e:
-        st.error(f"Error processing files: {e}")
+                if gap_val <= 20: res['Status'] = "Verified"
+                elif gap_val <= 50: res['Status'] = "Partial Info"
+                elif gap_val <= 80: res['Status'] = "Significant Gap"
+                else: res['Status'] = "Critical Gap"
+                    
+                temp_results.append(res)
+            
+            st.session_state.rag_results = temp_results
+            status.update(label="Analysis Complete", state="complete")
+            # Force rerun to show results immediately
+            st.rerun()
 
-# --- 5. RENDER FINDINGS AND DASHBOARD ---
+# --- 5. RENDER FINDINGS (OUTSIDE THE BUTTON BLOCK) ---
 if st.session_state.rag_results:
     st.divider()
+    df_results = pd.DataFrame(st.session_state.rag_results)
+    
+    st.subheader("Audit Distribution")
+    dist_cols = st.columns(4)
+    categories = [("Verified", "#00c853"), ("Partial Info", "#ffa500"), ("Significant Gap", "#ff6d00"), ("Critical Gap", "#ff4b4b")]
+    
+    for idx, (label, color) in enumerate(categories):
+        count = len(df_results[df_results['Status'] == label]) if 'Status' in df_results.columns else 0
+        dist_cols[idx].markdown(f"""
+            <div style="text-align:center; padding:10px; border-radius:10px; background:{color}22; border:1px solid {color}">
+                <h4 style="margin:0; color:{color}">{count}</h4>
+                <p style="margin:0; font-size:12px">{label}</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.write("")
     show_dashboard(st.session_state.rag_results) 
 
-    st.write("")
-    st.subheader("Answer Review & Finalization")
-    
-    updated_data = []
+    st.subheader("Detailed Item Review")
     for i, res in enumerate(st.session_state.rag_results):
         with st.container(border=True):
-            h_col, c_col = st.columns([5, 1])
+            h_col, g_col, s_col = st.columns([4, 1, 1])
             h_col.markdown(f"**Item {i+1}:** {res['Question']}")
             
-            if res.get('Confidence') == "High":
-                c_col.success("VERIFIED")
-            else:
-                c_col.warning("GAP FOUND")
+            gap_val = res.get('GapPercentage', 0)
+            status_label = res.get('Status', 'Pending')
+            color_map = {"Verified": "#00c853", "Partial Info": "#ffa500", "Significant Gap": "#ff6d00", "Critical Gap": "#ff4b4b"}
+            current_color = color_map.get(status_label, "#333")
             
-            ed_ans = st.text_area("Final Response:", value=res.get('Answer', ''), key=f"ed_{i}", height=100)
-            st.markdown(f"<p class='small-font'>Source Citation: {res.get('Citation', 'N/A')}</p>", unsafe_allow_html=True)
+            g_col.write(f"**Gap: {gap_val}%**")
+            g_col.markdown(f"""
+                <div class="gap-bar"><div class="gap-fill" style="width: {gap_val}%; background-color: {current_color};"></div></div>
+                """, unsafe_allow_html=True)
             
-            updated_data.append({
-                "Question": res['Question'], "Answer": ed_ans, 
-                "Citation": res.get('Citation', 'N/A'), "Confidence": res.get('Confidence')
-            })
+            if status_label == "Verified": s_col.success(status_label)
+            elif status_label == "Partial Info": s_col.warning(status_label)
+            else: s_col.error(status_label)
+            
+            # Use unique keys for text areas
+            st.text_area("Response:", value=res.get('Answer', ''), key=f"final_ed_{i}", height=100)
+            st.caption(f"Sources: {res.get('Citation', 'None')}")
 
-    st.session_state.rag_results = updated_data 
-
-    st.write("")
-    _, col_ex = st.columns([5, 1]) 
-    with col_ex:
-        csv_data = pd.DataFrame(st.session_state.rag_results).to_csv(index=False).encode('utf-8')
-        st.download_button("Download Report", data=csv_data, file_name="educonnect_audit.csv", type="primary", use_container_width=True)
+    csv_data = df_results.to_csv(index=False).encode('utf-8')
+    st.download_button("Download Report", data=csv_data, file_name="security_audit.csv", type="primary")

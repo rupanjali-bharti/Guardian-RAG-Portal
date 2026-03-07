@@ -1,3 +1,9 @@
-CloudDesk encrypts all data in transit using TLS 1.3.
-Data at rest is encrypted using AES-256 encryption.
-Security audits are conducted quarterly.
+EduConnect AI: Internal Information Security Policy (v4.2)
+
+1. Data Encryption: EduConnect AI employs industry-standard cryptographic controls to protect Sensitive Personal Information (SPI). All data at rest within our production environment is encrypted using AES-256 encryption. For data in transit, we enforce TLS 1.3 or higher to ensure secure communication channels between the client and our servers.
+
+2. Infrastructure & Hosting: Our primary production infrastructure is hosted exclusively on Amazon Web Services (AWS). To comply with data residency requirements for our primary market, all data is stored in the AWS Mumbai (ap-south-1) region within a logically isolated Private Virtual Cloud (VPC).
+
+3. Administrative Access: We strictly adhere to the Principle of Least Privilege (PoLP). Administrative access to production systems is restricted to authorized personnel only and requires Multi-Factor Authentication (MFA). Furthermore, access to critical infrastructure requires the use of a physical hardware security key (e.g., YubiKey).
+
+4. Compliance Audits: To maintain trust, EduConnect AI undergoes a SOC2 Type II audit on an annual basis. These audits are conducted by an independent, accredited third-party firm to verify our operational effectiveness.

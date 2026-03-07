@@ -1,0 +1,7 @@
+The scope of this policy encompasses all student records, institutional data, and metadata stored within the EduConnect AI production environment. It is designed to ensure compliance with global data protection regulations while maintaining the operational integrity of our university partners.
+
+Regarding our retention periods, standard user access logs are maintained for a rolling period of 12 months for security auditing. Formal academic records and PII (Personally Identifiable Information) are stored for the full duration of the institutional contract, followed by a 5-year cooling-off period before permanent removal.
+
+At the end of the retention cycle, data is disposed of using industry-standard cryptographic erasure, often referred to as "crypto-shredding". This process ensures that even if fragments of data remain on physical storage, they are rendered entirely unreadable and unrecoverable without the original encryption keys.
+
+For disaster recovery, EduConnect AI performs encrypted backups on a daily schedule. These backups are distributed across multiple availability zones within the AWS US-East region to provide 99.9% data durability. All data at rest within these backups, as well as in the live database, is protected using AES-256 bit encryption.

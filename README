@@ -136,6 +136,11 @@ The system provides a visual dashboard showing:
 - Questions with **Low Confidence**
 - **Documentation Gaps**
 
+- we will calculate a Grounding Score (0% to 100%) based on internal checks:
+    Presence of a Citation: +50% 
+    Passing the Keyword Filter: +25% 
+    Length & Detail: +25% 
+
 This helps leadership quickly understand readiness for an audit.
 
 ---

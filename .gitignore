@@ -17,3 +17,4 @@ Thumbs.db
 *.csv
 !questionnaire_template.csv
 chroma_db/
+uploaded_data/
