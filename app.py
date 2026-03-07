@@ -59,7 +59,7 @@ with st.sidebar:
                 text_content = ""
                 # PDF Extraction Logic
                 if f.name.endswith(".pdf"):
-                    pdf_reader = PyPDF2.PdfReader(f)
+                    pdf_reader = pypdf.PdfReader(f)
                     text_content = "\n".join([page.extract_text() for page in pdf_reader.pages])
                 # Word Extraction Logic
                 elif f.name.endswith(".docx"):
@@ -90,7 +90,7 @@ if q_file:
         df_q = pd.read_csv(q_file)
         questions = df_q.iloc[:, 0].dropna().tolist()
         
-        if st.button("Start Automated Audit", type="primary"):
+        if st.button("Start Answering", type="primary"):
             with st.status("Analyzing documentation via RAG...", expanded=True) as status:
                 temp_results = []
                 for i, q in enumerate(questions):
@@ -122,7 +122,7 @@ if st.session_state.rag_results:
     show_dashboard(st.session_state.rag_results) 
 
     st.write("")
-    st.subheader("Detailed Findings and Editor")
+    st.subheader("Answer Review & Finalization")
     
     updated_data = []
     for i, res in enumerate(st.session_state.rag_results):
