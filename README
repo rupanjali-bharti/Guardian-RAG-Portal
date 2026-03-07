@@ -1,0 +1,79 @@
+Here is a comprehensive `README.md` tailored specifically for your **Almabase GTM Engineer Intern** assignment. You can copy and paste this directly into the root folder of your repository.
+
+---
+
+# 🛡️ Guardian RAG Portal | EduConnect AI
+
+### 🌐 [Live Application Link](https://www.google.com/search?q=YOUR_DEPLOYED_URL_HERE) | 📂 [GitHub Repository](https://github.com/rupanjali-bharti/Guardian-RAG-Portal.git)
+
+---
+
+## 🏢 Fictional Company Profile
+
+* **Company Name**: **EduConnect AI**
+* **Industry**: Education Technology (SaaS)
+* **Description**: EduConnect AI is a specialized platform designed to automate administrative, security, and compliance workflows for higher-education institutions and universities. We help institutions manage student data safely while complying with global privacy standards.
+
+---
+
+## ❓ The Problem
+
+University compliance teams and EdTech vendors are frequently overwhelmed by **structured questionnaires** (Security Reviews, GDPR assessments, and Vendor Audits).
+
+* **Manual Effort**: Teams spend hours searching through internal PDFs and policy docs to answer the same questions repeatedly.
+* **Inconsistency**: Human error often leads to inconsistent or unverified answers across different audits.
+* **Lack of Evidence**: Standard AI bots often provide answers without proving *where* the information came from, making them unreliable for formal audits.
+
+---
+
+## ✅ The Solution: Guardian RAG Portal
+
+The **Guardian RAG Portal** is an automated tool that uses **Retrieval-Augmented Generation (RAG)** to bridge the gap between static policy documents and complex questionnaires.
+
+### **Key Features**
+
+* **Secure Authentication**: Role-based access via **Firebase** ensures that only authorized personnel can access sensitive internal policies.
+* **Grounded AI Answering**: The system uses a RAG pipeline to ensure every answer is derived strictly from uploaded "Sources of Truth".
+* **Automated Citations**: Each generated response is mapped to its specific source file (e.g., `security_policy.txt`), providing a clear audit trail.
+* **Executive Dashboard**: A visual interface providing a "Compliance Score" and immediate identification of "Documentation Gaps".
+* **Export Ready**: Review, edit, and export the finalized questionnaire as a structured CSV for immediate submission.
+
+---
+
+## 🏗️ Technical Architecture
+
+The system is built using a modular Python-based stack designed for scalability and transparency.
+
+1. **Ingestion Layer**: User uploads raw policy documents (.txt). These are chunked into meaningful segments and stored as embeddings in a **ChromaDB** vector store.
+2. **Retrieval Layer**: When a questionnaire (CSV) is uploaded, the system performs a semantic search to find the most relevant policy chunks for each question.
+3. **Generation Layer**: An LLM (Large Language Model) synthesizes the answer using *only* the retrieved context. If no information is found, it flags a "Gap".
+4. **UI/UX Layer**: A **Streamlit** frontend renders the Executive Dashboard and interactive Audit Cards for human review.
+
+---
+
+## 🛠️ Assumptions & Trade-offs
+
+* **Data Format**: I assumed reference documents would be provided in `.txt` format to prioritize retrieval accuracy over complex PDF parsing.
+* **Framework Selection**: I chose **Streamlit** for the frontend to deliver a functional end-to-end tool quickly, focusing on the RAG logic rather than custom CSS.
+* **Confidence Logic**: I implemented a strict "Confidence" check where an answer is flagged as a "Gap" if it lacks a direct citation or contains specific uncertainty keywords.
+
+---
+
+## 📈 Future Improvements
+
+* **Partial Regeneration**: Allow users to re-run specific "Low Confidence" questions after uploading new documents.
+* **Evidence Snippets**: Add a "View Source" button to show the exact paragraph used for the answer.
+* **Multi-Format Support**: Expand ingestion to support PDF, Docx, and Knowledge Graph (Neo4j) integrations.
+
+---
+
+## 🚀 How to Run Locally
+
+1. Clone the repo: `git clone https://github.com/rupanjali-bharti/Guardian-RAG-Portal.git`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Set up `.env`: Add your Firebase and LLM API keys.
+4. Run the app: `streamlit run app.py`
+
+---
+
+**Would you like me to help you format a professional LinkedIn post to share this completed project?**
