@@ -2,11 +2,12 @@ import streamlit as st
 import pandas as pd
 import os
 from dotenv import load_dotenv
+from streamlit_firebase_auth import FirebaseAuth
 import pypdf
 from docx import Document
 
 # Modularized Imports
-# Note: login_page and FirebaseAuth are no longer imported
+from login_page import show_login
 from main_rag import run_rag_single
 from vector_store import add_documents
 from dashboard import show_dashboard
@@ -26,9 +27,17 @@ def apply_adaptive_styling():
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. USER PROFILE (Bypassed) ---
-# We use a static name since authentication is removed
-user_name = "Guest Reviewer"
+# --- 2. CONFIGURATION ---
+auth = FirebaseAuth({
+    "apiKey": os.getenv("FIREBASE_API_KEY"),
+    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
+    "projectId": os.getenv("FIREBASE_PROJECT_ID"),
+    "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
+    "messagingSenderId": os.getenv("FIREBASE_MESSAGING_SENDER_ID"),
+    "appId": os.getenv("FIREBASE_APP_ID")
+})
+
+user_name = "Guest Reviewer" 
 
 # --- 3. SIDEBAR (KNOWLEDGE BASE MANAGEMENT) ---
 with st.sidebar:
@@ -50,7 +59,7 @@ with st.sidebar:
                 text_content = ""
                 # PDF Extraction Logic
                 if f.name.endswith(".pdf"):
-                    pdf_reader = pypdf.PdfReader(f)
+                    pdf_reader = PyPDF2.PdfReader(f)
                     text_content = "\n".join([page.extract_text() for page in pdf_reader.pages])
                 # Word Extraction Logic
                 elif f.name.endswith(".docx"):
@@ -126,7 +135,7 @@ if st.session_state.rag_results:
             else:
                 c_col.warning("GAP FOUND")
             
-            ed_ans = st.text_area("Final Response:", value=res.get('Answer', ''), key=f[i], height=100)
+            ed_ans = st.text_area("Final Response:", value=res.get('Answer', ''), key=f"ed_{i}", height=100)
             st.markdown(f"<p class='small-font'>Source Citation: {res.get('Citation', 'N/A')}</p>", unsafe_allow_html=True)
             
             updated_data.append({
