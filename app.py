@@ -3,6 +3,10 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 from streamlit_firebase_auth import FirebaseAuth
+import PyPDF2
+from docx import Document
+
+# Modularized Imports
 from login_page import show_login
 from main_rag import run_rag_single
 from vector_store import add_documents
@@ -11,7 +15,7 @@ from dashboard import show_dashboard
 load_dotenv()
 
 # --- 1. INITIALIZATION & STYLING ---
-st.set_page_config(page_title="EduConnect AI | Compliance Portal", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="EduConnect AI | Compliance Portal", layout="wide")
 
 def apply_adaptive_styling():
     st.markdown("""
@@ -24,7 +28,6 @@ def apply_adaptive_styling():
     """, unsafe_allow_html=True)
 
 # --- 2. CONFIGURATION ---
-
 auth = FirebaseAuth({
     "apiKey": os.getenv("FIREBASE_API_KEY"),
     "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
@@ -41,28 +44,40 @@ with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2942/2942789.png", width=60)
     st.title("EduConnect AI")
     with st.container(border=True):
-        st.write(f"👤 **{user_name}**")
+        st.write(f"User: **{user_name}**")
         st.caption("Direct Reviewer Access Enabled")
 
     st.divider()
-    st.subheader("📁 Knowledge Base")
+    st.subheader("Knowledge Base")
     st.markdown("<p class='small-font'>Upload university policies to ground the AI.</p>", unsafe_allow_html=True)
     
-    ref_files = st.file_uploader("Upload Policy Docs", accept_multiple_files=True,type=["txt", "pdf", "docx"], label_visibility="collapsed")
+    ref_files = st.file_uploader("Upload Policy Docs", accept_multiple_files=True, type=["txt", "pdf", "docx"], label_visibility="collapsed")
     
     if st.button("Index Documents", type="primary", use_container_width=True) and ref_files:
         with st.spinner("Indexing to Vector Store..."):
             for f in ref_files:
-                text_content = f.read().decode("utf-8")
-                # Paragraph-based chunking for better retrieval
-                chunks = [p for p in text_content.split("\n\n") if p.strip()]
-                add_documents(chunks, f.name)
-        st.success("Indexing Complete!")
+                text_content = ""
+                # PDF Extraction Logic
+                if f.name.endswith(".pdf"):
+                    pdf_reader = PyPDF2.PdfReader(f)
+                    text_content = "\n".join([page.extract_text() for page in pdf_reader.pages])
+                # Word Extraction Logic
+                elif f.name.endswith(".docx"):
+                    doc = Document(f)
+                    text_content = "\n".join([para.text for para in doc.paragraphs])
+                # Text Extraction Logic
+                else:
+                    text_content = f.read().decode("utf-8")
+                
+                if text_content.strip():
+                    chunks = [p for p in text_content.split("\n\n") if p.strip()]
+                    add_documents(chunks, f.name)
+        st.success("Indexing Complete")
 
 # --- 4. MAIN AUDIT LOGIC (RAG PIPELINE) ---
 apply_adaptive_styling()
-st.title("🛡️ Compliance Portal")
-st.markdown("<p class='small-font'>Automated Vendor Security Assessment & Gap Analysis</p>", unsafe_allow_html=True)
+st.title("Compliance Portal")
+st.markdown("<p class='small-font'>Automated Vendor Security Assessment and Gap Analysis</p>", unsafe_allow_html=True)
 
 if 'rag_results' not in st.session_state:
     st.session_state.rag_results = []
@@ -75,7 +90,7 @@ if q_file:
         df_q = pd.read_csv(q_file)
         questions = df_q.iloc[:, 0].dropna().tolist()
         
-        if st.button("🔍 Start Automated Audit", type="primary"):
+        if st.button("Start Automated Audit", type="primary"):
             with st.status("Analyzing documentation via RAG...", expanded=True) as status:
                 temp_results = []
                 for i, q in enumerate(questions):
@@ -83,12 +98,11 @@ if q_file:
                     ans_text = res.get('Answer', '').lower()
                     cit_text = str(res.get('Citation', '')).lower()
 
-                    # ROBUST GAP DETECTION LOGIC
+                    # Robust Gap Detection Logic
                     gap_keywords = ["not found", "not mentioned", "no information", "does not specify", "unavailable"]
                     has_gap_phrase = any(phrase in ans_text for phrase in gap_keywords)
                     is_missing_citation = cit_text in ["n/a", "none", "", "unknown", "nan"]
                     
-                    # Logic: High confidence only if data is present AND cited
                     if has_gap_phrase or is_missing_citation or len(ans_text) < 20:
                         res['Confidence'] = "Low"
                     else:
@@ -97,18 +111,18 @@ if q_file:
                     temp_results.append(res)
                 
                 st.session_state.rag_results = temp_results
-                status.update(label="✅ Analysis Complete", state="complete")
+                status.update(label="Analysis Complete", state="complete")
 
     except Exception as e:
         st.error(f"Error processing files: {e}")
 
-# --- 5. RENDER FINDINGS & DASHBOARD ---
+# --- 5. RENDER FINDINGS AND DASHBOARD ---
 if st.session_state.rag_results:
     st.divider()
     show_dashboard(st.session_state.rag_results) 
 
     st.write("")
-    st.subheader("📝 Detailed Findings & Editor")
+    st.subheader("Detailed Findings and Editor")
     
     updated_data = []
     for i, res in enumerate(st.session_state.rag_results):
@@ -121,20 +135,18 @@ if st.session_state.rag_results:
             else:
                 c_col.warning("GAP FOUND")
             
-            # Editable response area for final report generation
             ed_ans = st.text_area("Final Response:", value=res.get('Answer', ''), key=f"ed_{i}", height=100)
-            st.markdown(f"<p class='small-font'>📍 Source Citation: {res.get('Citation', 'N/A')}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='small-font'>Source Citation: {res.get('Citation', 'N/A')}</p>", unsafe_allow_html=True)
             
             updated_data.append({
                 "Question": res['Question'], "Answer": ed_ans, 
                 "Citation": res.get('Citation', 'N/A'), "Confidence": res.get('Confidence')
             })
 
-    # Sync state for export
     st.session_state.rag_results = updated_data 
 
     st.write("")
     _, col_ex = st.columns([5, 1]) 
     with col_ex:
         csv_data = pd.DataFrame(st.session_state.rag_results).to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download Report", data=csv_data, file_name="educonnect_audit.csv", type="primary", use_container_width=True)
+        st.download_button("Download Report", data=csv_data, file_name="educonnect_audit.csv", type="primary", use_container_width=True)
