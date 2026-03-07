@@ -48,7 +48,7 @@ with st.sidebar:
     st.subheader("📁 Knowledge Base")
     st.markdown("<p class='small-font'>Upload university policies to ground the AI.</p>", unsafe_allow_html=True)
     
-    ref_files = st.file_uploader("Upload Policy Docs", accept_multiple_files=True, type=["txt"], label_visibility="collapsed")
+    ref_files = st.file_uploader("Upload Policy Docs", accept_multiple_files=True,type=["txt", "pdf", "docx"], label_visibility="collapsed")
     
     if st.button("Index Documents", type="primary", use_container_width=True) and ref_files:
         with st.spinner("Indexing to Vector Store..."):
@@ -67,7 +67,7 @@ st.markdown("<p class='small-font'>Automated Vendor Security Assessment & Gap An
 if 'rag_results' not in st.session_state:
     st.session_state.rag_results = []
 
-st.write("### 🚀 Step 1: Upload Questionnaire")
+st.write("Upload Questionnaire")
 q_file = st.file_uploader("Upload Questionnaire (CSV)", type=["csv"], label_visibility="collapsed")
 
 if q_file:
