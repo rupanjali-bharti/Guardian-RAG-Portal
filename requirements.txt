@@ -16,3 +16,4 @@ python-docx
 pandas
 pypdf
 dotenv
+streamlit-firebase-auth
