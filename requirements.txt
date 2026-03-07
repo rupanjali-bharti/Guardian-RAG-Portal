@@ -17,3 +17,7 @@ pandas
 pypdf
 dotenv
 streamlit-firebase-auth
+chromadb
+langchain
+sentence-transformers
+pydantic
