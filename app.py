@@ -25,7 +25,8 @@ def apply_adaptive_styling():
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. AUTH SETUP ---
+# --- 2. AUTH SETUP (Bypassed for Direct Access) ---
+# We keep the object for variable consistency but skip the "stop" gate
 auth = FirebaseAuth({
     "apiKey": os.getenv("FIREBASE_API_KEY"),
     "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
@@ -35,33 +36,26 @@ auth = FirebaseAuth({
     "appId": os.getenv("FIREBASE_APP_ID")
 })
 
-if 'app_init' not in st.session_state:
-    try: auth.logout() 
-    except: pass
-    st.session_state.clear()
-    st.session_state['app_init'] = True
-    st.rerun()
+# COMMENTED OUT: Direct access enabled
+# user = auth.check_session()
+# if not user:
+#     apply_adaptive_styling()
+#     show_login(auth)
+#     st.stop()
 
-user = auth.check_session()
-if not user:
-    apply_adaptive_styling()
-    show_login(auth)
-    st.stop()
+# Mock user data for the UI since login is bypassed
+user_name = "Guest Developer" 
 
 # --- 3. SIDEBAR ---
-user_email = user.get('email', 'User')
-user_name = user_email.split('@')[0].capitalize() 
-
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2942/2942789.png", width=60)
     st.title("EduConnect AI")
     with st.container(border=True):
         st.write(f"👤 **{user_name}**")
-        if st.button("Log Out", type="secondary", use_container_width=True):
-            auth.logout()
-            st.session_state.clear()
-            st.rerun()
+        st.caption("Direct Access Mode Enabled")
+
     st.divider()
+    st.subheader("📁 Knowledge Base")
     ref_files = st.file_uploader("Upload Policy Docs", accept_multiple_files=True, type=["txt"])
     if st.button("Index Documents", type="primary", use_container_width=True) and ref_files:
         with st.spinner("Indexing..."):
@@ -74,29 +68,35 @@ with st.sidebar:
 # --- 4. MAIN AUDIT ---
 apply_adaptive_styling()
 st.title("🛡️ Compliance Portal")
+st.markdown("<p class='small-font'>Automated Vendor Security Assessment & Gap Analysis</p>", unsafe_allow_html=True)
+
 if 'rag_results' not in st.session_state:
     st.session_state.rag_results = []
 
+st.write("### 🚀 Step 1: Upload Questionnaire")
 q_file = st.file_uploader("Upload Questionnaire (CSV)", type=["csv"], label_visibility="collapsed")
+
 if q_file:
     df_q = pd.read_csv(q_file)
     questions = df_q.iloc[:, 0].dropna().tolist()
     if st.button("🚀 Start Audit", type="primary"):
-        with st.status("Analyzing...", expanded=True) as status:
+        with st.status("Analyzing documentation...", expanded=True) as status:
             temp_results = []
             for i, q in enumerate(questions):
                 res = run_rag_single(q)
                 ans = res.get('Answer', '').lower()
                 cit = str(res.get('Citation', '')).lower()
+                
+                # Confidence Logic
                 res['Confidence'] = "High" if ("not found" not in ans and cit not in ["n/a", "none", ""]) else "Low"
                 temp_results.append(res)
             st.session_state.rag_results = temp_results
-            status.update(label="✅ Complete", state="complete")
+            status.update(label="✅ Analysis Complete", state="complete")
 
 # --- 5. RENDER MODULAR DASHBOARD & FINDINGS ---
 if st.session_state.rag_results:
     st.divider()
-    show_dashboard(st.session_state.rag_results) # Modular Call
+    show_dashboard(st.session_state.rag_results) 
 
     st.subheader("📝 Detailed Findings")
     updated_data = []
