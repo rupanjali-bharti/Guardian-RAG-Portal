@@ -4,6 +4,22 @@
 ### 📂 Repository: https://github.com/rupanjali-bharti/Guardian-RAG-Portal
 
 ---
+## 📊 Project Output
+Below is the Executive Audit Dashboard showing the real-time compliance score and identified information gaps.
+
+![Executive Dashboard](./assets/output1.png)
+
+### 🔍 Detailed Gap Analysis
+The system identifies specific gaps in policy documentation by calculating a Grounding Score based on citations and answer depth.
+
+![Executive Dashboard](./assets/output2.png)
+![Executive Dashboard](./assets/output3.png)
+
+### 🛡️ Smart Gap Detection Logic
+Unlike standard RAG systems that "hallucinate" answers when info is missing, this tool uses a **Multi-Metric Grounding Score**:
+* **Source Verification (40%)**: Validates if the LLM cited a specific file from `sample_data`.
+* **Keyword Penalty (30%)**: Scans for "not mentioned" or "unavailable" phrases in the AI response.
+* **Detail Depth (30%)**: Ensures the answer provides technical substance (e.g., AES-256) rather than generic AI fluff.
 
 # 📌 Project Overview
 
