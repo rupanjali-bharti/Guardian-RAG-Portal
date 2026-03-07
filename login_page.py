@@ -10,7 +10,7 @@ def show_login(auth):
         st.markdown("Sign in or create a new account to access the portal.")
         st.divider()
         
-        # This enables the email/password UI with a 'Sign Up' option
+        # Changing this to ["password"] forces the email/password UI to appear
         auth.login_form(providers=["password"]) 
         
         st.caption("Authorized Access Only")
