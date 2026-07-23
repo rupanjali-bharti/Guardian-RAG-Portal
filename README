@@ -176,13 +176,13 @@ Final answers can be exported as a **CSV file** for immediate submission to:
 ```
                 ┌─────────────────────────┐
                 │     User Interface      │
-                │       (Streamlit)       │
+                │   (React + Vite)       │
                 └────────────┬────────────┘
                              │
                              ▼
                 ┌─────────────────────────┐
-                │   Authentication Layer  │
-                │       (Firebase)        │
+                │   Application Backend   │
+                │       (Flask API)       │
                 └────────────┬────────────┘
                              │
                              ▼
@@ -302,10 +302,10 @@ Users can:
 
 | Component | Technology |
 |--------|--------|
-| Frontend | Streamlit |
-| Backend | Python |
+| Frontend | React + Vite |
+| Backend | Flask + Python |
 | Vector Database | ChromaDB |
-| LLM Integration | OpenAI / LLM API |
+| LLM Integration | Groq / LLM API |
 | Embeddings | Sentence Transformers |
 | Authentication | Firebase |
 | Data Processing | LangChain |
@@ -328,7 +328,7 @@ Future versions can support:
 
 ### Framework Choice
 
-**Streamlit** was selected to rapidly build a functional end-to-end application without focusing on frontend complexity.
+**React + Vite** was selected for a faster, more interactive user experience, while **Flask** powers the backend RAG and audit workflow.
 
 ---
 
@@ -387,22 +387,29 @@ cd Guardian-RAG-Portal
 ### 2️⃣ Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
+cd frontend && npm install
 ```
 
 ### 3️⃣ Configure Environment Variables
 
-Create a `.env` file and add:
+Create a `.env` file in the backend folder and add:
 
 ```
-OPENAI_API_KEY=your_api_key
+GROQ_API_KEY=your_api_key
 FIREBASE_API_KEY=your_firebase_key
 ```
 
 ### 4️⃣ Run Application
 
 ```bash
-streamlit run app.py
+# Backend
+cd backend
+python api_server.py
+
+# Frontend (in a new terminal)
+cd frontend
+npm run dev
 ```
 
 ---
