@@ -1,23 +1,18 @@
 # 🛡️ Guardian RAG Portal | EduConnect AI
 
-### 🌐 Live Demo: https://rupanjali-bharti-guardian-rag-portal-app-ijg6m1.streamlit.app/ 
 ### 📂 Repository: https://github.com/rupanjali-bharti/Guardian-RAG-Portal
 
 ---
 ## 📊 Project Output
 Below is the Executive Audit Dashboard showing the real-time compliance score and identified information gaps.
 
-![Executive Dashboard]("https://github.com/user-attachments/assets/097ceec7-59aa-4bd9-ad3d-8f0eaa40d3cd")
 
 ### 🔍 Detailed Gap Analysis
 The system identifies specific gaps in policy documentation by calculating a Grounding Score based on citations and answer depth.
 
-![Executive Dashboard](./assets/output2.png)
-![Executive Dashboard](./assets/output3.png)
-
 ### 🛡️ Smart Gap Detection Logic
 Unlike standard RAG systems that "hallucinate" answers when info is missing, this tool uses a **Multi-Metric Grounding Score**:
-* **Source Verification (40%)**: Validates if the LLM cited a specific file from `sample_data`.
+* **Source Verification (40%)**: Validates whether the response cites a relevant policy document from the loaded knowledge base.
 * **Keyword Penalty (30%)**: Scans for "not mentioned" or "unavailable" phrases in the AI response.
 * **Detail Depth (30%)**: Ensures the answer provides technical substance (e.g., AES-256) rather than generic AI fluff.
 
@@ -115,7 +110,7 @@ If no relevant information exists, the system flags a **documentation gap**, hel
 
 ### 🔐 Secure Access
 
-Role-based authentication using **Firebase** ensures that only authorized users can access internal policy documents.
+Role-based access and protected routes are part of the application experience, while the audit workflow uses the backend service to process policy documents and generate grounded responses.
 
 ---
 
@@ -152,10 +147,7 @@ The system provides a visual dashboard showing:
 - Questions with **Low Confidence**
 - **Documentation Gaps**
 
-- we will calculate a Grounding Score (0% to 100%) based on internal checks:
-    Presence of a Citation: +50% 
-    Passing the Keyword Filter: +25% 
-    Length & Detail: +25% 
+The audit view calculates a grounding-based score (0% to 100%) using the backend response quality and document citation evidence.
 
 This helps leadership quickly understand readiness for an audit.
 
@@ -307,8 +299,8 @@ Users can:
 | Vector Database | ChromaDB |
 | LLM Integration | Groq / LLM API |
 | Embeddings | Sentence Transformers |
-| Authentication | Firebase |
-| Data Processing | LangChain |
+| Authentication | Firebase-ready app flow |
+| Data Processing | Local document processing |
 
 ---
 
