@@ -10,7 +10,13 @@ from vector_store import reset_collection, add_documents
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
+    }
+})
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = CURRENT_DIR
