@@ -583,6 +583,92 @@ nav {
     overflow-y: auto;
 }
 
+.view-switcher {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.view-chip {
+    border: 1px solid var(--border-light);
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.view-chip.active {
+    background: rgba(6, 182, 212, 0.16);
+    color: var(--accent-cyan);
+    border-color: rgba(6, 182, 212, 0.4);
+}
+
+.upload-zone {
+    border: 1px dashed var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.02);
+    margin-bottom: 16px;
+}
+
+.upload-zone.dragging {
+    border-color: var(--accent-cyan);
+    background: rgba(6, 182, 212, 0.12);
+}
+
+.upload-zone i {
+    font-size: 24px;
+    color: var(--accent-cyan);
+}
+
+.upload-zone strong {
+    color: var(--text-main);
+}
+
+.upload-zone .small {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.upload-card {
+    background: var(--bg-deep);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.upload-card-header h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.upload-card-header p {
+    margin: 0 0 16px;
+    color: var(--text-muted);
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.file-score {
+    font-size: 11px;
+    color: var(--accent-cyan);
+    margin-top: 4px;
+}
+
 .top-nav {
     display: flex;
     justify-content: space-between;
@@ -787,6 +873,45 @@ nav {
     background-color: var(--status-green-bg);
     color: var(--status-green);
     border: 1px solid var(--status-green);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-partial {
+    background-color: var(--status-amber-bg);
+    color: var(--status-amber);
+    border: 1px solid var(--status-amber);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-significant {
+    background-color: var(--status-orange-bg);
+    color: var(--status-orange);
+    border: 1px solid var(--status-orange);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-critical {
+    background-color: var(--status-red-bg);
+    color: var(--status-red);
+    border: 1px solid var(--status-red);
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 13px;

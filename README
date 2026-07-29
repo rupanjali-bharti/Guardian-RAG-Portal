@@ -2,10 +2,6 @@
 
 ### 📂 Repository: https://github.com/rupanjali-bharti/Guardian-RAG-Portal
 
----
-## 📊 Project Output
-Below is the Executive Audit Dashboard showing the real-time compliance score and identified information gaps.
-
 
 ### 🔍 Detailed Gap Analysis
 The system identifies specific gaps in policy documentation by calculating a Grounding Score based on citations and answer depth.

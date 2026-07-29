@@ -1,6 +1,7 @@
 import os
 import re
 from dotenv import load_dotenv
+from vector_store import reset_collection, add_documents, retrieve
 
 try:
     from groq import Groq
@@ -15,7 +16,7 @@ api_key = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=api_key) if api_key and Groq else None
 
 
-def _load_context_documents():
+def _load_context_documents(session_id=None):
     context_files = ["security_policy.txt", "compliance_and_privacy.txt", "corporate_directory.txt", "data_retention_policy.txt"]
     base_path = os.path.join(os.path.dirname(__file__), "sample_data")
     documents = []
@@ -26,7 +27,25 @@ def _load_context_documents():
             with open(file_path, "r", encoding="utf-8") as handle:
                 documents.append({"name": file_name, "text": handle.read()})
 
+    if session_id:
+        session_dir = os.path.join(os.path.dirname(__file__), "uploads", session_id)
+        if os.path.isdir(session_dir):
+            for file_name in sorted(os.listdir(session_dir)):
+                if file_name.endswith((".txt", ".md", ".json", ".pdf", ".docx")) and not file_name.endswith(".csv"):
+                    file_path = os.path.join(session_dir, file_name)
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding="utf-8", errors="ignore") as handle:
+                            documents.append({"name": file_name, "text": handle.read()})
+
     return documents
+
+
+def _build_context_from_retrieval(question, session_id=None):
+    hits = retrieve(question, k=4, session_id=session_id)
+    if not hits:
+        return []
+
+    return [{"name": hit["source"], "text": hit["text"]} for hit in hits]
 
 
 def _fallback_answer(question, documents):
@@ -59,10 +78,14 @@ def _fallback_answer(question, documents):
     }
 
 
-def run_rag_single(question):
-    documents = _load_context_documents()
+def run_rag_single(question, session_id=None):
+    documents = _load_context_documents(session_id=session_id)
     if not documents:
         return {"Question": question, "Answer": "No local documents were found for the audit index.", "Citation": "None"}
+
+    indexed_context = _build_context_from_retrieval(question, session_id=session_id)
+    if indexed_context:
+        documents = indexed_context
 
     if client:
         context_files = [doc["name"] for doc in documents]
@@ -72,10 +95,10 @@ def run_rag_single(question):
 
         context = "\n\n".join(context_parts)
         system_prompt = (
-            "You are a Security Auditor. Answer the question using ONLY the provided context. "
-            "At the very end of your answer, you MUST list the document names you used to find the answer "
-            "in this exact format: SOURCES_USED: [file1.txt, file2.txt]. "
-            "If you find no information, write: SOURCES_USED: [None]."
+            "You are a ruthless, highly literal compliance auditor. Your ONLY job is to extract exact answers "
+            "from the provided context. If the provided context does not explicitly contain the direct answer to "
+            "the question, you must NOT extrapolate, guess, or synthesize related information. Instead, you MUST "
+            "reply with EXACTLY this string and nothing else: [DOCUMENTATION_GAP_DETECTED]."
         )
 
         try:

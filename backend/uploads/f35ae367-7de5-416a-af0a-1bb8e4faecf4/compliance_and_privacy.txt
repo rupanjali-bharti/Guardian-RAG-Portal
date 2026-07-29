@@ -1,0 +1,9 @@
+EduConnect AI: Global Privacy and Data Governance Framework
+
+1. Regulatory Compliance: EduConnect AI is committed to global privacy standards. We are fully compliant with the General Data Protection Regulation (GDPR). In our service delivery to universities, EduConnect AI operates in the capacity of a Data Processor, while the university remains the Data Controller.
+
+2. Data Retention Policy: We retain alumni records to facilitate long-term engagement. Records are stored for a period of 10 years following the user's last recorded engagement or login. After this period, data is automatically purged unless a manual extension is requested by the university.
+
+3. User Privacy Rights: Individuals may exercise their "Right to be Forgotten" or request data portability at any time. These requests can be submitted directly through the "Privacy Portal" located within the user account settings page.
+
+4. Service Level Agreement (SLA): We provide a guaranteed 99.9% uptime SLA for the EduConnect Alumni Portal. To ensure minimal disruption, our standard maintenance windows are scheduled weekly on Sundays at 2:00 AM IST.

@@ -1,0 +1,1 @@
+Access is based on role-based access control (RBAC). Users receive only the permissions they need to do their job. Access rights are reviewed on a set schedule, such as quarterly. Multi-factor authentication (MFA) is required for sensitive systems.
