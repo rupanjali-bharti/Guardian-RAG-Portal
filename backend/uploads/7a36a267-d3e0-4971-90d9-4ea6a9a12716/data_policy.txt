@@ -1,1 +1,0 @@
-Encryption ensures information confidentiality and should be used for data both at rest and in transit. The encryption standards in use for stored data often mean AES-256. For data in transit, it typically means TLS 1.2 or higher.

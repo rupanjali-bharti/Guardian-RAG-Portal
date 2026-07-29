@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api";
+import { API_ENDPOINT } from '../utils/api';
 
 
 function getFileIcon(fileName = '') {
@@ -59,7 +58,7 @@ export default function Audit() {
   const loadAuditData = async () => {
     try {
       setError('');
-      const response = await fetch(`${API_BASE_URL}/api/audit`);
+      const response = await fetch(API_ENDPOINT('audit'));
       if (!response.ok) {
         throw new Error('Unable to reach the backend audit service.');
       }
@@ -129,7 +128,7 @@ export default function Audit() {
       policyFiles.forEach((file) => formData.append('policy_files', file));
       formData.append('questionnaire_file', questionnaireFile);
 
-      const response = await fetch(`${API_BASE_URL}/api/audit`, {
+      const response = await fetch(API_ENDPOINT('audit'), {
         method: 'POST',
         body: formData,
       });
@@ -286,7 +285,7 @@ export default function Audit() {
               <h1>Executive Audit Dashboard</h1>
             </div>
             <div className="top-actions">
-              <Link to="/audit/new" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', marginRight: '10px' }}>
+              <Link to="/audit" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', marginRight: '10px' }}>
                 <i className="fa-solid fa-plus" style={{ marginRight: '6px' }}></i>
                 <span>New Audit</span>
               </Link>

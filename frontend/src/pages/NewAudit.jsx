@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api";
+import { API_ENDPOINT } from '../utils/api';
 
 function getFileIcon(fileName = '') {
   const lowerName = fileName.toLowerCase();
@@ -86,7 +85,7 @@ export default function NewAudit() {
       const formData = new FormData();
       filesToIndex.forEach((file) => formData.append('policy_files', file));
       formData.append('session_id', sessionId);
-      const response = await fetch(`${API_BASE_URL}/api/index-documents`, {
+      const response = await fetch(API_ENDPOINT('index-documents'), {
         method: 'POST',
         body: formData,
       });
@@ -151,7 +150,7 @@ export default function NewAudit() {
       formData.append('questionnaire_file', questionnaireFile);
       formData.append('session_id', sessionId);
 
-      const response = await fetch(`${API_BASE_URL}/api/audit`, {
+      const response = await fetch(API_ENDPOINT('audit'), {
         method: 'POST',
         body: formData,
       });

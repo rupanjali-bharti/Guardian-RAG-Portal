@@ -33,13 +33,14 @@ export default function Navbar() {
         }} className="mobile-nav-content">
           <div className="nav-links" style={{ flexDirection: 'column', gap: '16px' }}>
             <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+            <Link to="/audit" onClick={() => setIsMobileMenuOpen(false)}>Audit</Link>
             <a href="/#workflow" onClick={() => setIsMobileMenuOpen(false)}>Workflow</a>
             <a href="/#technology" onClick={() => setIsMobileMenuOpen(false)}>Technology</a>
             <a href="/#security" onClick={() => setIsMobileMenuOpen(false)}>Security & Compliance</a>
           </div>
           <div className="nav-actions" style={{ flexDirection: 'column', width: '100%' }}>
             <a href="#" className="btn-ghost">Log in</a>
-            <Link to="/audit/new" className="btn-primary" style={{ width: '100%', textAlign: 'center' }}>Try Now</Link>
+            <Link to="/audit" className="btn-primary" style={{ width: '100%', textAlign: 'center' }}>Try Now</Link>
           </div>
         </div>
 
@@ -58,13 +59,14 @@ export default function Navbar() {
         
         <div className="nav-links">
           <Link to="/">Home</Link>
+          <Link to="/audit">Audit</Link>
           <a href="/#workflow">Workflow</a>
           <a href="/#technology">Technology</a>
           <a href="/#security">Security & Compliance</a>
         </div>
         <div className="nav-actions">
           <a href="#" className="btn-ghost">Log in</a>
-          <Link to="/audit/new" className="btn-primary">Try Now</Link>
+          <Link to="/audit" className="btn-primary">Try Now</Link>
         </div>
       </div>
     </nav>

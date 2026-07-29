@@ -1,1 +1,0 @@
-A well-formed incident response plan shows that a vendor is equipped to navigate security incidents and cybersecurity breaches effectively. The plan includes processes for incident detection, containment, remediation, and communication strategies for informing the affected parties. The plan is tested through annual tabletop exercises and periodic live simulations.
