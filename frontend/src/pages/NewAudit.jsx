@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
-const API_BASE_URL = 'http://127.0.0.1:5001';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api";
 
 function getFileIcon(fileName = '') {
   const lowerName = fileName.toLowerCase();
@@ -199,7 +199,7 @@ export default function NewAudit() {
               <i className="fa-solid fa-shield-halved"></i>
               <h2>New Audit</h2>
             </div>
-            <Link to="/audit" className="back-link" title="Back to existing audits">
+            <Link to="/" className="back-link" title="Back to home">
               <i className="fa-solid fa-arrow-right-from-bracket"></i>
             </Link>
           </div>
@@ -274,9 +274,9 @@ export default function NewAudit() {
               <button type="button" className="btn-outline" onClick={startFreshAudit} style={{ marginRight: '8px' }}>
                 Start Fresh Audit
               </button>
-              <Link to="/audit" className="btn-outline" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+              <Link to="/" className="btn-outline" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
                 <i className="fa-solid fa-arrow-left" style={{ marginRight: '6px' }}></i>
-                <span>Back to Existing</span>
+                <span>Back to Home</span>
               </Link>
             </div>
           </div>
