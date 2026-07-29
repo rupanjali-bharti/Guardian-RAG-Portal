@@ -4,10 +4,13 @@ import glob
 import re
 import uuid
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from main_rag import run_rag_single
 from vector_store import reset_collection, add_documents
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = CURRENT_DIR
