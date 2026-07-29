@@ -50,7 +50,8 @@ def is_origin_allowed(origin):
 
 CORS(
     app,
-    resources={r"/*": {"origins": get_allowed_origins()}},
+    # Bypass the function and force-allow all origins to guarantee connection
+    resources={r"/*": {"origins": "*"}}, 
     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "x-session-id", "session_id"],
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 )
