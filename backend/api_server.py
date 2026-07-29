@@ -13,17 +13,28 @@ app = Flask(__name__)
 
 
 def get_allowed_origins():
-    configured_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
-    if configured_origins:
-        return [origin.strip() for origin in configured_origins.split(",") if origin.strip()]
-
-    return [
+    fallback_origins = [
+        "https://guardian-rag-portal.vercel.app",
         "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://*.vercel.app",
+        "http://localhost:5001",
     ]
+
+    configured_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
+    merged_origins = list(fallback_origins)
+
+    if configured_origins:
+        merged_origins.extend(
+            origin.strip() for origin in configured_origins.split(",") if origin.strip()
+        )
+
+    seen = set()
+    unique_origins = []
+    for origin in merged_origins:
+        if origin and origin not in seen:
+            seen.add(origin)
+            unique_origins.append(origin)
+
+    return unique_origins
 
 
 def is_origin_allowed(origin):
@@ -39,7 +50,7 @@ def is_origin_allowed(origin):
 
 CORS(
     app,
-    resources={r"/api/*": {"origins": get_allowed_origins()}},
+    resources={r"/*": {"origins": get_allowed_origins()}},
     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "x-session-id", "session_id"],
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 )
@@ -376,4 +387,5 @@ def upload_audit_endpoint():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port, debug=False)

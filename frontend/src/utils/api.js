@@ -1,4 +1,6 @@
-const DEFAULT_API_BASE_URL = 'http://127.0.0.1:5001';
+const DEFAULT_API_BASE_URL = import.meta.env.PROD
+  ? 'https://auditgaurd.onrender.com'
+  : 'http://127.0.0.1:5001';
 
 function normalizeBaseUrl(value = '') {
   const trimmedValue = `${value || DEFAULT_API_BASE_URL}`.trim();
