@@ -3,6 +3,7 @@ import csv
 import glob
 import re
 import uuid
+from fnmatch import fnmatch
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from main_rag import run_rag_single
@@ -10,13 +11,38 @@ from vector_store import reset_collection, add_documents
 
 app = Flask(__name__)
 
-CORS(app, resources={
-    r"/api/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
-    }
-})
+
+def get_allowed_origins():
+    configured_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
+    if configured_origins:
+        return [origin.strip() for origin in configured_origins.split(",") if origin.strip()]
+
+    return [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://*.vercel.app",
+    ]
+
+
+def is_origin_allowed(origin):
+    if not origin:
+        return False
+
+    allowed_origins = get_allowed_origins()
+    if "*" in allowed_origins:
+        return True
+
+    return any(fnmatch(origin, pattern) for pattern in allowed_origins) or origin in allowed_origins
+
+
+CORS(
+    app,
+    resources={r"/api/*": {"origins": get_allowed_origins()}},
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "x-session-id", "session_id"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+)
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = CURRENT_DIR
@@ -27,9 +53,15 @@ os.makedirs(UPLOAD_ROOT, exist_ok=True)
 
 @app.after_request
 def add_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    origin = request.headers.get("Origin")
+    if is_origin_allowed(origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+    elif response.headers.get("Access-Control-Allow-Origin") in {None, ""}:
+        response.headers["Access-Control-Allow-Origin"] = get_allowed_origins()[0] if get_allowed_origins() else "*"
+
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, x-session-id, session_id"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     return response
 
 
