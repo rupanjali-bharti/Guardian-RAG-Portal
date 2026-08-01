@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { apiRequest } from '../utils/api';
+import { apiRequest, DEFAULT_TIMEOUT_MS } from '../utils/api';
 
 function getFileIcon(fileName = '') {
   const lowerName = fileName.toLowerCase();
@@ -84,7 +84,7 @@ export default function NewAudit() {
     setIsIndexing(true);
     setIsWaitingForBackend(true);
     setError('');
-    setStatusMessage('Connecting to the Render backend. This can take a moment if it is waking up...');
+    setStatusMessage('Waking up server and processing documents, please wait...');
 
     try {
       const formData = new FormData();
@@ -93,7 +93,7 @@ export default function NewAudit() {
       const response = await apiRequest('index-documents', {
         method: 'POST',
         body: formData,
-        timeoutMs: 30000,
+        timeoutMs: DEFAULT_TIMEOUT_MS,
         retries: 1,
       });
 
@@ -151,7 +151,7 @@ export default function NewAudit() {
     setIsGenerating(true);
     setIsWaitingForBackend(true);
     setError('');
-    setStatusMessage('Starting the audit workflow. The Render backend may need a few seconds to wake up...');
+    setStatusMessage('Waking up server and processing documents, please wait...');
 
     try {
       const formData = new FormData();
@@ -162,7 +162,7 @@ export default function NewAudit() {
       const response = await apiRequest('audit', {
         method: 'POST',
         body: formData,
-        timeoutMs: 30000,
+        timeoutMs: DEFAULT_TIMEOUT_MS,
         retries: 1,
       });
 

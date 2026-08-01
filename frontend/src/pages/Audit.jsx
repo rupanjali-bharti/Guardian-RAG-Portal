@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { apiRequest } from '../utils/api';
+import { apiRequest, DEFAULT_TIMEOUT_MS } from '../utils/api';
 
 
 function getFileIcon(fileName = '') {
@@ -61,8 +61,8 @@ export default function Audit() {
     try {
       setError('');
       setIsWaitingForBackend(true);
-      setStatusMessage('Connecting to the Render backend. This can take a moment if it is waking up...');
-      const response = await apiRequest('audit', { method: 'GET', timeoutMs: 30000, retries: 1 });
+      setStatusMessage('Waking up server and processing documents, please wait...');
+      const response = await apiRequest('audit', { method: 'GET', timeoutMs: DEFAULT_TIMEOUT_MS, retries: 1 });
       const data = await response.json();
       setDemoFiles((data.documents || []).map((file, index) => ({
         id: `demo-${index + 1}`,
@@ -129,20 +129,17 @@ export default function Audit() {
     setIsGenerating(true);
     setIsWaitingForBackend(true);
     setError('');
-    setStatusMessage('Starting the audit workflow. The Render backend may need a few seconds to wake up...');
+      setStatusMessage('Waking up server and processing documents, please wait...');
 
-    try {
-      const formData = new FormData();
-      policyFiles.forEach((file) => formData.append('policy_files', file));
-      formData.append('questionnaire_file', questionnaireFile);
+      try {
+        const formData = new FormData();
+        policyFiles.forEach((file) => formData.append('policy_files', file));
+        formData.append('questionnaire_file', questionnaireFile);
 
-      const response = await apiRequest('audit', {
-        method: 'POST',
-        body: formData,
-        timeoutMs: 30000,
-        retries: 1,
-      });
-
+        const response = await apiRequest('audit', {
+          method: 'POST',
+          body: formData,
+          timeoutMs: DEFAULT_TIMEOUT_MS,
       const data = await response.json();
       setSessionFiles((data.documents || []).map((file, index) => ({
         id: `session-${index + 1}`,

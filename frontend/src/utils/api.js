@@ -1,6 +1,10 @@
-const DEFAULT_API_BASE_URL = import.meta.env.PROD
-  ? 'https://auditgaurd.onrender.com'
-  : 'http://127.0.0.1:5001';
+export const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+  ? `${import.meta.env.VITE_API_BASE_URL}`.trim()
+  : import.meta.env.PROD
+    ? 'https://auditgaurd.onrender.com'
+    : 'http://127.0.0.1:5001';
+
+export const DEFAULT_TIMEOUT_MS = 120000;
 
 function normalizeBaseUrl(value = '') {
   const trimmedValue = `${value || DEFAULT_API_BASE_URL}`.trim();
@@ -34,13 +38,17 @@ export async function apiRequest(path = '', options = {}) {
     method = 'GET',
     body,
     headers,
-    timeoutMs = 30000,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
     retries = 1,
     ...restOptions
   } = options;
 
   const requestHeaders = new Headers(headers || {});
   const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+
+  if (isFormData && requestHeaders.has('Content-Type')) {
+    requestHeaders.delete('Content-Type');
+  }
 
   let requestBody = body;
 
