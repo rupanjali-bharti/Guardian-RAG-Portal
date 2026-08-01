@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { API_ENDPOINT } from '../utils/api';
+import { apiRequest } from '../utils/api';
 
 
 function getFileIcon(fileName = '') {
@@ -46,6 +46,8 @@ export default function Audit() {
   const [sessionFiles, setSessionFiles] = useState([]);
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
+  const [isWaitingForBackend, setIsWaitingForBackend] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
   const [policyFiles, setPolicyFiles] = useState([]);
   const [questionnaireFile, setQuestionnaireFile] = useState(null);
   const [draggingPolicies, setDraggingPolicies] = useState(false);
@@ -58,10 +60,9 @@ export default function Audit() {
   const loadAuditData = async () => {
     try {
       setError('');
-      const response = await fetch(API_ENDPOINT('audit'));
-      if (!response.ok) {
-        throw new Error('Unable to reach the backend audit service.');
-      }
+      setIsWaitingForBackend(true);
+      setStatusMessage('Connecting to the Render backend. This can take a moment if it is waking up...');
+      const response = await apiRequest('audit', { method: 'GET', timeoutMs: 30000, retries: 1 });
       const data = await response.json();
       setDemoFiles((data.documents || []).map((file, index) => ({
         id: `demo-${index + 1}`,
@@ -74,9 +75,14 @@ export default function Audit() {
       setResults(data.results || []);
       setPolicyFiles([]);
       setQuestionnaireFile(null);
+      setStatusMessage('Audit data loaded successfully.');
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Could not load audit data from the backend.');
+      const message = err.message || 'Could not load audit data from the backend.';
+      setError(message);
+      setStatusMessage('The backend may still be waking up. Please wait a moment and try again.');
+    } finally {
+      setIsWaitingForBackend(false);
     }
   };
 
@@ -121,21 +127,21 @@ export default function Audit() {
     }
 
     setIsGenerating(true);
+    setIsWaitingForBackend(true);
     setError('');
+    setStatusMessage('Starting the audit workflow. The Render backend may need a few seconds to wake up...');
 
     try {
       const formData = new FormData();
       policyFiles.forEach((file) => formData.append('policy_files', file));
       formData.append('questionnaire_file', questionnaireFile);
 
-      const response = await fetch(API_ENDPOINT('audit'), {
+      const response = await apiRequest('audit', {
         method: 'POST',
         body: formData,
+        timeoutMs: 30000,
+        retries: 1,
       });
-
-      if (!response.ok) {
-        throw new Error('Unable to start the audit run.');
-      }
 
       const data = await response.json();
       setSessionFiles((data.documents || []).map((file, index) => ({
@@ -147,11 +153,15 @@ export default function Audit() {
       })));
       setResults(data.results || []);
       setActiveView('new');
+      setStatusMessage('Audit run completed successfully.');
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Could not run the audit workflow.');
+      const message = err.message || 'Could not run the audit workflow.';
+      setError(message);
+      setStatusMessage('The backend may still be waking up. Please wait a moment and try again.');
     } finally {
       setIsGenerating(false);
+      setIsWaitingForBackend(false);
     }
   };
 
@@ -206,6 +216,12 @@ export default function Audit() {
           <div className="sidebar-section-title">
             <span>Knowledge Base</span>
           </div>
+
+          {statusMessage ? (
+            <div role="status" style={{ marginBottom: '12px', padding: '10px 12px', borderRadius: '8px', background: 'rgba(41, 182, 246, 0.12)', color: '#dff7ff', fontSize: '0.92rem' }}>
+              {statusMessage}
+            </div>
+          ) : null}
 
           <div className="view-switcher">
             <button className={`view-chip active`}>

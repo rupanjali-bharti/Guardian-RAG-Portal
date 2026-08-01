@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { API_ENDPOINT } from '../utils/api';
+import { apiRequest } from '../utils/api';
 
 function getFileIcon(fileName = '') {
   const lowerName = fileName.toLowerCase();
@@ -46,6 +46,8 @@ function buildSummary(results = []) {
 
 export default function NewAudit() {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isWaitingForBackend, setIsWaitingForBackend] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
   const [error, setError] = useState('');
   const [policyFiles, setPolicyFiles] = useState([]);
   const [questionnaireFile, setQuestionnaireFile] = useState(null);
@@ -71,6 +73,7 @@ export default function NewAudit() {
     setResults([]);
     setUploadedFiles([]);
     setError('');
+    setStatusMessage('');
   };
 
   const indexKnowledgeBase = async (filesToIndex) => {
@@ -79,20 +82,20 @@ export default function NewAudit() {
     }
 
     setIsIndexing(true);
+    setIsWaitingForBackend(true);
     setError('');
+    setStatusMessage('Connecting to the Render backend. This can take a moment if it is waking up...');
 
     try {
       const formData = new FormData();
       filesToIndex.forEach((file) => formData.append('policy_files', file));
       formData.append('session_id', sessionId);
-      const response = await fetch(API_ENDPOINT('index-documents'), {
+      const response = await apiRequest('index-documents', {
         method: 'POST',
         body: formData,
+        timeoutMs: 30000,
+        retries: 1,
       });
-
-      if (!response.ok) {
-        throw new Error('Unable to re-index the knowledge base.');
-      }
 
       const data = await response.json();
       const indexedList = (data.indexed_files || []).map((name, index) => ({
@@ -103,13 +106,17 @@ export default function NewAudit() {
         score: null,
       }));
       setUploadedFiles(indexedList);
+      setStatusMessage('Knowledge base indexed successfully.');
       return data;
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Could not index the knowledge base.');
+      const message = err.message || 'Could not index the knowledge base.';
+      setError(message);
+      setStatusMessage('The backend may still be waking up. Please wait a moment and try again.');
       return null;
     } finally {
       setIsIndexing(false);
+      setIsWaitingForBackend(false);
     }
   };
 
@@ -142,7 +149,9 @@ export default function NewAudit() {
     }
 
     setIsGenerating(true);
+    setIsWaitingForBackend(true);
     setError('');
+    setStatusMessage('Starting the audit workflow. The Render backend may need a few seconds to wake up...');
 
     try {
       const formData = new FormData();
@@ -150,14 +159,12 @@ export default function NewAudit() {
       formData.append('questionnaire_file', questionnaireFile);
       formData.append('session_id', sessionId);
 
-      const response = await fetch(API_ENDPOINT('audit'), {
+      const response = await apiRequest('audit', {
         method: 'POST',
         body: formData,
+        timeoutMs: 30000,
+        retries: 1,
       });
-
-      if (!response.ok) {
-        throw new Error('Unable to start the audit run.');
-      }
 
       const data = await response.json();
       const indexedDocs = (data.indexed_files || []).map((name, index) => ({
@@ -169,11 +176,15 @@ export default function NewAudit() {
       }));
       setUploadedFiles(indexedDocs);
       setResults(data.results || []);
+      setStatusMessage('Audit run completed successfully.');
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Could not run the audit workflow.');
+      const message = err.message || 'Could not run the audit workflow.';
+      setError(message);
+      setStatusMessage('The backend may still be waking up. Please wait a moment and try again.');
     } finally {
       setIsGenerating(false);
+      setIsWaitingForBackend(false);
     }
   };
 
@@ -206,6 +217,12 @@ export default function NewAudit() {
           <div className="sidebar-section-title">
             <span>Uploaded Files</span>
           </div>
+
+          {statusMessage ? (
+            <div role="status" style={{ marginBottom: '12px', padding: '10px 12px', borderRadius: '8px', background: 'rgba(41, 182, 246, 0.12)', color: '#dff7ff', fontSize: '0.92rem' }}>
+              {statusMessage}
+            </div>
+          ) : null}
 
           <div className="file-list">
             {uploadedFiles.length > 0 ? (
@@ -256,7 +273,7 @@ export default function NewAudit() {
             <button type="button" className="btn-outline small" onClick={() => policyInputRef.current?.click()}>
               Choose Files
             </button>
-            <button type="button" className="btn-primary small" onClick={() => indexKnowledgeBase(policyFiles)} disabled={isIndexing || !policyFiles.length}>
+            <button type="button" className="btn-primary small" onClick={() => indexKnowledgeBase(policyFiles)} disabled={isIndexing || !policyFiles.length || isWaitingForBackend}>
               {isIndexing ? 'Indexing...' : '⚡ Re-Index Knowledge Base'}
             </button>
             <input ref={policyInputRef} type="file" accept=".txt" multiple hidden onChange={(event) => handlePoliciesSelect(event.target.files)} />

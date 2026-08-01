@@ -48,33 +48,45 @@ def is_origin_allowed(origin):
     return any(fnmatch(origin, pattern) for pattern in allowed_origins) or origin in allowed_origins
 
 
+def add_cors_headers(response):
+    origin = request.headers.get("Origin")
+    if origin and is_origin_allowed(origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+    else:
+        response.headers["Access-Control-Allow-Origin"] = "*"
+
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, x-session-id, session_id"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    return response
+
+
 CORS(
     app,
-    # Bypass the function and force-allow all origins to guarantee connection
-    resources={r"/*": {"origins": "*"}}, 
+    resources={r"/api/*": {"origins": get_allowed_origins()}},
     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "x-session-id", "session_id"],
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 )
+
+
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = jsonify({"status": "ok"})
+        response.status_code = 200
+        return add_cors_headers(response)
+
+
+@app.after_request
+def apply_cors_headers(response):
+    return add_cors_headers(response)
+
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = CURRENT_DIR
 SAMPLE_DATA_DIR = os.path.join(CURRENT_DIR, "sample_data")
 UPLOAD_ROOT = os.path.join(CURRENT_DIR, "uploads")
 os.makedirs(UPLOAD_ROOT, exist_ok=True)
-
-
-@app.after_request
-def add_cors_headers(response):
-    origin = request.headers.get("Origin")
-    if is_origin_allowed(origin):
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Vary"] = "Origin"
-    elif response.headers.get("Access-Control-Allow-Origin") in {None, ""}:
-        response.headers["Access-Control-Allow-Origin"] = get_allowed_origins()[0] if get_allowed_origins() else "*"
-
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, x-session-id, session_id"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    return response
 
 
 def get_request_session_id():
