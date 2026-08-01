@@ -6,6 +6,7 @@ import uuid
 from fnmatch import fnmatch
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from werkzeug.exceptions import HTTPException
 from main_rag import run_rag_single
 from vector_store import reset_collection, add_documents
 
@@ -59,6 +60,23 @@ def add_cors_headers(response):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, x-session-id, session_id"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     return response
+
+
+def make_error_response(message, status_code=500):
+    response = jsonify({"error": message})
+    response.status_code = status_code
+    return add_cors_headers(response)
+
+
+@app.errorhandler(Exception)
+def handle_uncaught_exception(error):
+    if isinstance(error, HTTPException):
+        return make_error_response(error.description, error.code)
+
+    app.logger.exception("Unhandled exception in request")
+    return make_error_response(
+        "An internal server error occurred while processing the request."
+    )
 
 
 CORS(
@@ -342,22 +360,87 @@ def audit_endpoint():
 
 @app.post("/api/index-documents")
 def index_documents_endpoint():
-    policy_files = request.files.getlist("policy_files")
-    if not policy_files:
-        return jsonify({"error": "At least one policy file is required."}), 400
+    try:
+        policy_files = request.files.getlist("policy_files")
+        if not policy_files:
+            return make_error_response("At least one policy file is required.", 400)
 
-    session_id = get_request_session_id() or str(uuid.uuid4())
-    indexed_files, active_session_id = index_uploaded_documents(policy_files, session_id=session_id)
-    return jsonify({
-        "success": True,
-        "session_id": active_session_id,
-        "indexed_files": indexed_files,
-        "message": "Knowledge base indexed successfully.",
-    })
+        session_id = get_request_session_id() or str(uuid.uuid4())
+        indexed_files, active_session_id = index_uploaded_documents(policy_files, session_id=session_id)
+        return jsonify({
+            "success": True,
+            "session_id": active_session_id,
+            "indexed_files": indexed_files,
+            "message": "Knowledge base indexed successfully.",
+        })
+    except MemoryError:
+        app.logger.exception("MemoryError while indexing documents")
+        return make_error_response(
+            "Server memory capacity was exceeded while processing files. Please try smaller files or switch to a larger plan.",
+            507,
+        )
+    except Exception:
+        app.logger.exception("Error while indexing documents")
+        return make_error_response(
+            "Failed to index documents. The request may be too large or the server is under resource pressure.",
+            500,
+        )
 
 
 @app.post("/api/audit")
 def upload_audit_endpoint():
+    try:
+        session_id = get_request_session_id()
+        policy_files = request.files.getlist("policy_files")
+        questionnaire_file = request.files.get("questionnaire_file")
+
+        if session_id:
+            session_dir = os.path.join(UPLOAD_ROOT, session_id)
+            os.makedirs(session_dir, exist_ok=True)
+        else:
+            session_id = str(uuid.uuid4())
+            session_dir = os.path.join(UPLOAD_ROOT, session_id)
+            os.makedirs(session_dir, exist_ok=True)
+
+        if policy_files or questionnaire_file:
+            session_id, session_dir, saved_policies, questionnaire_path = save_uploaded_files(
+                policy_files,
+                questionnaire_file,
+                session_id=session_id,
+            )
+        else:
+            saved_policies = []
+            questionnaire_path = find_questionnaire_csv(session_dir)
+
+        if not questionnaire_path:
+            return make_error_response("A questionnaire CSV is required.", 400)
+
+        indexed_files, active_session_id = index_uploaded_documents(policy_files, session_id=session_id)
+
+        questions_to_answer = load_questions(questionnaire_path)
+        payload = build_audit_payload(
+            questions_to_answer,
+            session_id=active_session_id,
+            questionnaire_path=questionnaire_path,
+            target_directory=session_dir,
+        )
+        payload["session_id"] = active_session_id
+        payload["session_dir"] = session_dir
+        payload["saved_policies"] = saved_policies
+        payload["indexed_files"] = indexed_files
+        return jsonify(payload)
+    except MemoryError:
+        app.logger.exception("MemoryError while running audit")
+        return make_error_response(
+            "Server memory capacity was exceeded while processing the audit. Please try a smaller upload or a larger plan.",
+            507,
+        )
+    except Exception:
+        app.logger.exception("Error while processing audit upload")
+        return make_error_response(
+            "Failed to complete the audit workflow. The server might be under resource pressure.",
+            500,
+        )
     session_id = get_request_session_id()
     policy_files = request.files.getlist("policy_files")
     questionnaire_file = request.files.get("questionnaire_file")

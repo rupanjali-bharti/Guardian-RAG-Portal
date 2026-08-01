@@ -5,10 +5,23 @@ from sentence_transformers import SentenceTransformer
 
 hf_token = os.getenv("HF_TOKEN")
 
-# Initialize ChromaDB (Saves data to a local folder)
-client = chromadb.PersistentClient(path=os.path.join(os.path.dirname(__file__), "chroma_db"))
+_client = None
+_MODEL = None
 MODEL_NAME = "all-MiniLM-L6-v2"
-MODEL = SentenceTransformer(MODEL_NAME)
+
+
+def get_chromadb_client():
+    global _client
+    if _client is None:
+        _client = chromadb.PersistentClient(path=os.path.join(os.path.dirname(__file__), "chroma_db"))
+    return _client
+
+
+def get_sentence_transformer():
+    global _MODEL
+    if _MODEL is None:
+        _MODEL = SentenceTransformer(MODEL_NAME)
+    return _MODEL
 
 
 def _get_collection_name(session_id=None):
@@ -17,7 +30,7 @@ def _get_collection_name(session_id=None):
 
 def _get_collection(session_id=None):
     collection_name = _get_collection_name(session_id)
-    return client.get_or_create_collection(name=collection_name)
+    return get_chromadb_client().get_or_create_collection(name=collection_name)
 
 
 def reset_collection(session_id=None):
@@ -57,7 +70,7 @@ def add_documents(docs, source_name, session_id=None):
         return []
 
     ids = [f"{source_name}_{i}" for i in range(len(all_chunks))]
-    embeddings = MODEL.encode(all_chunks).tolist()
+    embeddings = get_sentence_transformer().encode(all_chunks).tolist()
 
     collection.add(
         ids=ids,
@@ -71,7 +84,7 @@ def add_documents(docs, source_name, session_id=None):
 def retrieve(query, k=3, session_id=None):
     """Semantic search to find the most relevant context."""
     collection = _get_collection(session_id=session_id)
-    query_vec = MODEL.encode([query]).tolist()
+    query_vec = get_sentence_transformer().encode([query]).tolist()
     results = collection.query(query_embeddings=query_vec, n_results=k)
 
     formatted = []
